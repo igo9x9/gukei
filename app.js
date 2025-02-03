@@ -58,7 +58,7 @@ phina.define('GameScene', {
 
         createGoban(BOARD_SIZE);
 
-        createTapArea();
+        // createTapArea();
 
 
         // 碁盤
@@ -369,31 +369,31 @@ phina.define('GameScene', {
         }
 
         // 石を置くタップ領域を作成
-        function createTapArea() {
-            const size = self.banLayer.size;
-            const floor = Math.floor(size / 2);
+        // function createTapArea() {
+        //     const size = self.banLayer.size;
+        //     const floor = Math.floor(size / 2);
 
-            for (let y = 0; y < size; y++) {
-                for (let x = 0; x < size; x++) {
-                    const area = CircleShape({
-                        fill: "transparent",
-                        radius: self.banLayer.grid.unitWidth / 2 - 2,
-                        strokeWidth: 0,
-                    });
-                    area.addChildTo(self.tapLayer).setPosition(self.banLayer.grid.span(x - floor), self.banLayer.grid.span(y - floor));
-                    area.setInteractive(true);
-                    area.on("pointstart", () => {
-                        const xx = x + 1;
-                        const yy = y + 1;
+        //     for (let y = 0; y < size; y++) {
+        //         for (let x = 0; x < size; x++) {
+        //             const area = CircleShape({
+        //                 fill: "transparent",
+        //                 radius: self.banLayer.grid.unitWidth / 2 - 2,
+        //                 strokeWidth: 0,
+        //             });
+        //             area.addChildTo(self.tapLayer).setPosition(self.banLayer.grid.span(x - floor), self.banLayer.grid.span(y - floor));
+        //             area.setInteractive(true);
+        //             area.on("pointstart", () => {
+        //                 const xx = x + 1;
+        //                 const yy = y + 1;
 
-                        setStone(nextColor, xx, yy);
-                        drawAllStones();
-                        nextColor = nextColor === BLACK ? WHITE : BLACK;
-                        move += 1;
-                    });
-                }
-            }
-        }
+        //                 setStone(nextColor, xx, yy);
+        //                 drawAllStones();
+        //                 nextColor = nextColor === BLACK ? WHITE : BLACK;
+        //                 move += 1;
+        //             });
+        //         }
+        //     }
+        // }
 
         // 石を描画
         function drawStone(color, x, y, show) {
