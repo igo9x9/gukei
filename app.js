@@ -1298,7 +1298,7 @@ phina.define('GameScene', {
                 line.addChildTo(self.banLayer)
                 .setPosition(self.banLayer.grid.span(boards[move].lastX - floor), self.banLayer.grid.span(boards[move].lastY - floor));
                 // line.tweener.to({alpha:0}, 1000, "easeInQuint").play();
-                const spliteName = "face" + Math.randint(2, 4);
+                const spliteName = "face" + Math.randint(2, 5);
                 faceSprite.setImage(spliteName);
             } else {
                 gukeiLabel.text = "";
@@ -1550,6 +1550,7 @@ ASSETS = {
         "face2": "face2.png",
         "face3": "face3.png",
         "face4": "face4.png",
+        "face5": "face5.png",
     }
 };
 
