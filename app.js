@@ -10,23 +10,88 @@ phina.define('TitleScene', {
         this.backgroundColor = "white";
 
         Label({
-            text: "愚形チェッカー",
+            text: "愚形ちゃん",
             fontSize: 64,
         })
         .addChildTo(this)
-        .setPosition(this.gridX.center(0), this.gridY.center(-5));
+        .setPosition(this.gridX.center(0), this.gridY.center(-6));
 
         Sprite("title")
         .addChildTo(this)
-        .setPosition(this.gridX.center(0), this.gridY.center(-1));
+        .setPosition(this.gridX.center(0), this.gridY.center(-2.5));
 
-        this.on("pointstart", () => self.exit("GameScene"));
+        LabelArea({
+            text: "※囲碁の棋譜(SGF)を読み込んで、愚形（サカレ形、二目の頭、アキ三角）を検出する…というツールを作ろうとしたものですが、検出精度が悪くて実用性がなく、保留中です。",
+            width: 500,
+            height: 300,
+            fontSize: 25,
+        }).addChildTo(this)
+        .setPosition(this.gridX.center(0), this.gridY.center(3));
+
+        const loadButton = MyButton({
+            text: "クリップボードから読み込む",
+            width: 500,
+            height: 100,
+            fill: "white",
+            fontColor: "black",
+            stroke: "black",
+            strokeWidth: 5,
+        }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center(4.5));
+        loadButton.selected = function() {
+            navigator.clipboard
+                .readText()
+                .then((clipText) => {
+                    const sgf = new SgfParser();
+
+                    try {
+                        const parsed = sgf.parse(clipText);
+                        console.log(parsed);
+                        alert("読み込み成功！");
+                        if (parsed.props.SZ !== "19") {
+                            alert("しかし、19路盤しか対応していません。");
+                            return;
+                        }
+                        self.exit("GameScene", {kifu: parsed});
+                    } catch (e) {
+                        alert("正常に読み込めませんでした。");
+                        return;
+                    }
+
+                });
+        };
+
+        const sampleButton = MyButton({
+            text: "サンプル棋譜で試す",
+            width: 500,
+            height: 100,
+            fill: "white",
+            fontColor: "black",
+            stroke: "black",
+            strokeWidth: 5,
+        }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center(6.5));
+        sampleButton.selected = function() {
+            const sgf = new SgfParser();
+
+            // const sample = "(;GM[1]SZ[19]KM[7]RU[Chinese]RE[W+R]PB[miguruta (1473)]PW[nken6516 (1369)];B[pc];W[dq];B[do];W[co];B[cn];W[cp];B[dm];W[fq];B[cj];W[cd];B[qp];W[pe];B[nd];W[qc];B[qb];W[qd];B[rb];W[qh];B[kq];W[kc];B[mc];W[fc];B[hc];W[ke];B[he];W[fe];B[nf];W[kg];B[hg];W[fg];B[hi];W[ch];B[ki];W[lh];B[li];W[mh];B[nj];W[oh];B[pi];W[mi];B[mj];W[ph];B[hq];W[op];B[pn];W[qq];B[rq];W[pq];B[nq];W[np];B[mp];W[mo];B[lp];W[nn];B[po];W[kn];B[kl];W[in];B[ho];W[hn];B[gn];W[gm];B[fn];W[io];B[hp];W[il];B[lo];W[ln];B[mm];W[mn];B[er];W[eq];B[fr];W[ds];B[gr];W[gk];B[fh];W[eh];B[fi];W[ei];B[fj];W[rr];B[rp];W[sr];B[oq];W[pp];B[oo];W[no];B[om];W[nm];B[nl];W[km];B[qi];W[oi];B[oj];W[ri];B[rj];W[rh];B[qk];W[bj];B[bk];W[bi];B[bn];W[bo];B[bq];W[dr];B[ao];W[ap];B[an];W[bp];B[gb];W[fb];B[fa];W[ea];B[ga];W[ec];B[gg];W[ff];B[se];W[re];B[sc];W[sf];B[sd];W[oe];B[ne];W[gc];B[ib];W[id];B[hd];W[lb];B[mb];W[ck];B[bl];W[dj];B[bs];W[br];B[dp];W[cq];B[of];W[qf];B[pr];W[qr];B[or];W[eo];B[dn];W[fo];B[go];W[ek];B[cl];W[dk];B[fm];W[fl];B[jl];W[jm];B[ik];W[hk];B[ij];W[ip];B[lm];W[jq];B[jr];W[kp];B[lr];W[iq];B[ir];W[ps];B[os];W[qs];B[jg];W[jf];B[kh];W[ig];B[lg];W[jh];B[mg];W[ie];B[hf];W[ii];B[ji];W[ih];B[jc];W[jd];B[kb];W[if];B[lc];W[kd];B[lf];W[kf];B[pf];W[pd];B[od];W[rc];B[sb];W[rd];B[ko];W[jo];B[jp];W[ic];B[jb];W[kp];B[fk];W[mq];B[lq];W[hj];B[kk];W[hh];B[gh];W[sq];B[sp];W[ol];B[nk];W[pm];B[qm];W[on];B[pl];W[qo])";
+            // const sample = "(;FF[1]CA[UTF-8]SZ[19]PB[COMLv5級]PW[COMLv5級]BS[11]WS[11]KM[0.0]HA[2]RU[Chinese]AP[みんなの囲碁]VW[]GN[みんなの囲碁]GC[]DT[2025-02-04 09:44:21]RE[B+5.0]AB[pd][dp];W[pp];B[dd];W[qf];B[nc];W[rd];B[qc];W[qi];B[nq];W[lq];B[qq];W[qp];B[pq];W[op];B[nr];W[mo];B[rp];W[ro];B[rq];W[qn];B[dj];W[fq];B[cn];W[dr];B[cq];W[fo];B[gp];W[fp];B[jq];W[jo];B[lr];W[kr];B[kq];W[mr];B[lp];W[mq];B[mp];W[ls];B[np];W[jr];B[iq];W[ir];B[hr];W[hq];B[hp];W[gq];B[io];W[kp];B[ko];W[jp];B[ip];W[jn];B[in];W[jm];B[im];W[jl];B[il];W[jk];B[ik];W[jj];B[ij];W[ji];B[ii];W[jh];B[ih];W[jg];B[ig];W[jf];B[if];W[je];B[hd];W[cc];B[cd];W[dc];B[ec];W[eb];B[fc];W[fb];B[gb];W[bd];B[be];W[bc];B[cf];W[no];B[lo];W[ln];B[kn];W[lm];B[km];W[kl];B[of];W[oh];B[mg];W[mh];B[lh];W[lg];B[nh];W[mi];B[ng];W[ni];B[lf];W[kg];B[pg];W[qg];B[ph];W[pi];B[qh];W[rh];B[rc];W[qd];B[pe];W[fm];B[fk];W[dm];B[cm];W[dl];B[cl];W[dk];B[ck];W[ej];B[ek];W[cj];B[di];W[ci];B[dh];W[ch];B[cg];W[bg];B[bf];W[bk];B[bl];W[bi];B[ag];W[ah];B[bh];W[oq];B[or];W[bg];B[af];W[aj];B[bh];W[pr];B[qr];W[bg];B[ad];W[ac];B[bh];W[gc];B[gd];W[bg];B[db];W[cb];B[bh];W[hc];B[ic];W[bg];B[fa];W[da];B[bh];W[hb];B[ib];W[bg];B[ha];W[bh];B[cr];W[le];B[me];W[ld];B[md];W[lc];B[sd];W[re];B[se];W[sf];B[sc];W[rg];B[qe];W[rf];B[er];W[fr];B[ds];W[eq];B[dq];W[fs];B[es];W[mb];B[nb];W[na];B[oa];W[ma];B[pb];W[kb];B[dn];W[em];B[al];W[ak];B[gl];W[gm];B[hm];W[ie];B[he];W[eo];B[do];W[go];B[en];W[ns];B[ps];W[sp];B[sq];W[so];B[og];W[oi];B[jc];W[kf];B[mf];W[ja];B[jb];W[kc];B[ia];W[ka];B[jd];W[kd];B[id];W[ms];B[os];W[ae];B[oo];W[on];B[ad];W[qs];B[rs];W[ae];B[po];W[qo];B[ad];W[dg];B[eg];W[ae];B[df];W[ad];B[mc];W[ea];B[ga];W[fl];B[gk];W[fn];B[hn];W[gn];B[pf];W[ho];B[el];W[hs];B[ep];W[tt];B[tt])";
+            // const sample = "(;FF[1]CA[UTF-8]SZ[19]PB[COMLv6級]PW[COMLv4級]BS[10]WS[12]KM[0.0]HA[2]RU[Chinese]AP[みんなの囲碁]VW[]GN[みんなの囲碁]GC[]DT[2025-02-03 22:23:40]RE[W+9.0]AB[pd][dp];W[cd];B[pp];W[cn];B[fq];W[bp];B[cq];W[ck];B[ed];W[df];B[cc];W[bc];B[dc];W[be];B[hc];W[nq];B[lq];W[qn];B[np];W[mp];B[mq];W[op];B[no];W[oo];B[oq];W[pq];B[nr];W[or];B[nq];W[qp];B[pr];W[po];B[qq];W[rq];B[pp];W[qr];B[pq];W[rr];B[rp];W[qo];B[nm];W[qk];B[qi];W[nc];B[oc];W[nd];B[pf];W[jc];B[lc];W[ld];B[kd];W[kc];B[md];W[le];B[mc];W[me];B[nb];W[oe];B[pe];W[ob];B[mb];W[pc];B[od];W[ne];B[pb];W[je];B[id];W[jd];B[hf];W[jg];B[hh];W[ji];B[hj];W[jk];B[hl];W[jm];B[in];W[jn];B[io];W[jo];B[jp];W[kp];B[kq];W[mn];B[nn];W[nk];B[ml];W[mk];B[ll];W[lk];B[kl];W[jl];B[kk];W[kj];B[ij];W[jj];B[ko];W[kn];B[lp];W[lo];B[mo];W[kp];B[ip];W[bq];B[br];W[cp];B[dq];W[ar];B[bs];W[do];B[eo];W[en];B[fo];W[fn];B[gn];W[gm];B[hm];W[di];B[fm];W[em];B[fl];W[el];B[ek];W[dk];B[ej];W[ei];B[fi];W[fh];B[gi];W[ff];B[ge];W[og];B[pg];W[oh];B[ph];W[rj];B[ri];W[si];B[sh];W[sj];B[rg];W[ib];B[hb];W[ha];B[ga];W[ia];B[fb];W[cb];B[db];W[bb];B[oi];W[ni];B[oj];W[nj];B[ok];W[nl];B[ol];W[mm];B[ko];W[ln];B[ql];W[rl];B[qm];W[rm];B[qj];W[pm];B[pl];W[fe];B[fd];W[ie];B[he];W[ic];B[hd];W[lb];B[la];W[kb];B[oa];W[ka];B[ma];W[dj];B[of];W[nf];B[pk];W[rk];B[om];W[pn];B[qs];W[rs];B[ps];W[ro];B[ee];W[ef];B[de];W[ce];B[ca];W[ba];B[da];W[gg];B[hg];W[fk];B[gl];W[fj];B[ih];W[jh];B[if];W[jf];B[gh];W[ii];B[gf];W[fg];B[gj];W[kp];B[dn];W[dm];B[ko];W[fa];B[gb];W[kp];B[co];W[bo];B[ko];W[cr];B[dr];W[kp];B[nh];W[ng];B[ko];W[rh];B[sg];W[kp];B[sp];W[so];B[ko];W[aq];B[kp];W[as];B[cs];W[gk];B[hk];W[ik];B[im];W[il];B[hi];W[on];B[dd];W[ig];B[tt];W[tt])";
+            const sample = "(;FF[1]CA[UTF-8]SZ[19]PB[COMLv6級]PW[COMLv初段]BS[10]WS[16]KM[0.0]HA[4]RU[Chinese]AP[みんなの囲碁]VW[]GN[みんなの囲碁]GC[]DT[2025-02-03 22:02:43]RE[W+R]AB[pd][dp][pp][dd];W[qf];B[nd];W[qn];B[nq];W[rp];B[qq];W[pl];B[dj];W[fc];B[hc];W[fe];B[df];W[jc];B[he];W[fg];B[hg];W[fi];B[dh];W[fk];B[dl];W[je];B[jg];W[lf];B[lg];W[mf];B[of];W[mg];B[lh];W[mh];B[li];W[mi];B[lj];W[mc];B[nc];W[mb];B[nb];W[rd];B[qc];W[rc];B[rb];W[sb];B[qb];W[ph];B[oh];W[oi];B[pg];W[qg];B[pi];W[qh];B[oj];W[ni];B[pk];W[nk];B[nj];W[mj];B[mk];W[ol];B[ml];W[ok];B[pj];W[qk];B[ec];W[fb];B[eb];W[hb];B[ib];W[ic];B[gb];W[hd];B[ha];W[gd];B[fa];W[gc];B[hb];W[jb];B[ie];W[id];B[jf];W[kf];B[kg];W[fm];B[dn];W[kk];B[lk];W[kl];B[mn];W[lm];B[mm];W[lq];B[ko];W[iq];B[io];W[gp];B[go];W[fo];B[hp];W[hq];B[fp];W[gq];B[fn];W[eo];B[gn];W[ep];B[en];W[dq];B[cq];W[cp];B[do];W[eq];B[cr];W[dr];B[bp];W[cs];B[bs];W[ds];B[br];W[hk];B[ij];W[ik];B[jj];W[jn];B[jo];W[in];B[kn];W[hn];B[ho];W[gm];B[jm];W[im];B[il];W[hm];B[jl];W[jk];B[km];W[hi];B[hj];W[gj];B[gh];W[fh];B[gi];W[kj];B[ki];W[ji];B[jh];W[ii];B[gf];W[ff];B[kq];W[kr];B[jq];W[jr];B[lp];W[mq];B[mp];W[nr];B[oq];W[or];B[pr];W[rq];B[rr];W[oe];B[ne];W[pe];B[nf];W[od];B[oc];W[qd];B[pc];W[pa])";
+            // const sample = "(;FF[1]CA[UTF-8]SZ[19]PB[COMLv10級]PW[COMLv二段]BS[6]WS[17]KM[6.5]HA[0]RU[Chinese]AP[みんなの囲碁]VW[]GN[みんなの囲碁]GC[]DT[2025-02-03 21:26:07]RE[W+58.5];B[pd];W[pp];B[dp];W[dd];B[fc];W[cf];B[db];W[cc];B[ic];W[qf];B[qe];W[pf];B[nd];W[pj];B[nq];W[qn];B[pr];W[qq];B[kq];W[cn];B[fq];W[dj];B[cl];W[dl]TL[1,0];B[cm];W[dm];B[bn];W[co];B[bo];W[cp];B[cq];W[bp];B[bq];W[ao];B[an];W[ap];B[bl];W[bj];B[dn];W[do];B[en];W[eo];B[fn];W[fo];B[go];W[gn];B[gm];W[hn];B[fm];W[gp];B[ho];W[fp];B[hp];W[gq]TL[1,0];B[eq];W[hq]TL[1,0];B[iq];W[ir];B[jr];W[ip];B[io];W[jq];B[jp];W[iq];B[jo];W[kr]TL[1,0];B[lr];W[js];B[lq];W[dr];B[dq];W[fr]TL[1,0];B[er];W[gr];B[cr];W[ar];B[aq];W[ds];B[es];W[bs];B[cs];W[ck];B[ek];W[dk];B[ej];W[ei]TL[1,0];B[fi];W[fh];B[eh];W[di];B[gh];W[fg];B[gj];W[gg];B[hh];W[hg]TL[1,0];B[ih];W[ig]TL[1,0];B[jh];W[lc];B[ld];W[kd];B[kc];W[md];B[le];W[me];B[mc];W[lb];B[mb];W[nc]TL[1,0];B[nb];W[oc];B[ob];W[lf]TL[1,0];B[ke];W[kf];B[jd];W[je];B[kd];W[od];B[pc];W[oe];B[rf];W[rg];B[re];W[qr];B[or];W[li]TL[1,0];B[kj];W[lj];B[kk];W[lk];B[ll];W[ml];B[lm];W[mm];B[mn];W[nn];B[mo];W[no];B[np];W[cb];B[dc];W[ed];B[fd];W[fe];B[ec];W[hd];B[hc];W[gd];B[gc];W[id];B[kb];W[ki];B[ji];W[kh];B[jg];W[jf];B[kg];W[lg];B[mf];W[ne];B[mg];W[mh];B[ng];W[nh];B[og];W[ph];B[pg];W[qg];B[oh];W[oi];B[qh];W[pi];B[rh];W[sg];B[sh];W[ri];B[qi];W[qj];B[pe];W[of];B[sf];W[el];B[fl];W[da];B[ea];W[ca];B[fb];W[op];B[oq];W[ls];B[ms];W[ks];B[qs];W[rs];B[ps];W[rr];B[fs];W[gs];B[ep];W[dr];B[pq];W[em])";
+            // const sample = "(;FF[4]CA[UTF-8]GM[1]DT[2025-02-02]PC[OGS: https://online-go.com/game/71982392]GN[Дружеский матч]PB[BlackLion]PW[hisana15]BR[18k]WR[19k]TM[259200]OT[86400 fischer]RE[W+38.5]SZ[19]KM[6.5]RU[Japanese];B[pd];W[dp];B[dd];W[pp];B[qq];W[pq];B[qp];W[po];B[qc];W[jp];B[cc];W[jc];B[gc];W[mc];B[nc];W[hb];B[gb];W[nb];B[ob];W[nd];B[oc];W[mb];B[cq];W[dq];B[cp];W[do];B[co];W[je];B[dn];W[fo];B[em];W[jk];B[ci];W[ji];B[pg];W[qj];B[qi];W[pj];B[pi];W[oi];B[oh];W[ni];B[gi];W[gm];B[gf];W[gk];B[fk];W[gj];B[fj];W[ij];B[cf];W[he];B[ge];W[hd];B[gd];W[ib];B[nf];W[me];B[nh];W[mh];B[mg];W[lh];B[lg];W[kg];B[dr];W[er];B[cr];W[fq];B[qo];W[qn];B[rn];W[qm];B[rm];W[ql];B[rl];W[cm];B[cn];W[cj];B[dj];W[ck];B[bm];W[bl];B[am];W[bi];B[dm];W[ch];B[cl];W[di];B[dk];W[bk];B[ei];W[eh];B[fh];W[eg];B[ef];W[dg];B[df];W[cg];B[bg];W[bh];B[bf];W[fl];B[el];W[fn];B[fm];W[gl];B[ih];W[hi];B[hh];W[jh];B[ii];W[hj];B[hf];W[if];B[ig];W[jg];B[pr];W[or];B[ps];W[os];B[qr];W[ri];B[rh];W[rj];B[qh];W[oe];B[pe];W[of];B[og];W[pf];B[qf];W[ne];B[mf];W[lf];B[ng];W[ke];B[hr];W[jr];B[gq];W[gp];B[fr];W[fs];B[gs];W[gr];B[hs];W[hq];B[iq];W[ip];B[jq];W[kq];B[mr];W[mp];B[lr];W[kr];B[lq];W[lp];B[fg];W[nq];B[ds];W[es];B[hc];W[ic];B[si];W[sj];B[sh];W[rk];B[sl];W[ag];B[af];W[ah];B[na];W[ma];B[oa];W[ga];B[fa];W[ha];B[eb];W[al];B[od];W[oj];B[en];W[eo];B[];W[])";
+            // const sample = "(;FF[4]CA[UTF-8]GM[1]DT[2025-01-24]PC[OGS: https://online-go.com/game/71691087]GN[hazbot vs. hisana15]PB[hazbot]PW[hisana15]BR[22k]WR[19k]TM[259200]OT[86400 fischer]RE[W+R]SZ[19]KM[0.5]RU[Japanese];B[dd];W[pp];B[qd];W[dp];B[di];W[jp];B[kd];W[pj];B[dn];W[fp];B[qq];W[pq];B[qp];W[qo];B[ro];W[qn];B[rn];W[qm];B[rm];W[qg];B[pf];W[jm];B[jk];W[hm];B[gm];W[hl];B[hk];W[gl];B[fm];W[nj];B[fk];W[lk];B[go];W[gp];B[hn];W[in];B[il];W[im];B[jl];W[lm];B[hp];W[le];B[lf];W[me];B[nd];W[nf];B[nh];W[oh];B[og];W[ng];B[mh];W[pg];B[of];W[lg];B[kf];W[lh];B[mf];W[mg];B[ne];W[mi];B[ld];W[fc];B[ec];W[ic];B[gc];W[gb];B[fd];W[fb];B[gd];W[kb];B[lb];W[hc];B[jc];W[jb];B[id];W[cd];B[cc];W[ce];B[df];W[bg];B[cf];W[bf];B[bi];W[bc];B[ae];W[cb];B[dc];W[da];B[db];W[ba];B[ea];W[ca];B[eb];W[ha];B[ab];W[ac];B[de];W[bd];B[hd];W[ia];B[fa];W[ka];B[cq];W[cp];B[dq];W[eq];B[er];W[fr];B[es];W[jh];B[jg];W[ig];B[kh];W[ni];B[ih];W[ji];B[if];W[hg];B[kg];W[ki];B[hi];W[bn];B[bm];W[cn];B[cm];W[bq];B[br];W[ap];B[ar];W[fs];B[cs];W[re];B[rd];W[qe];B[pe];W[qf];B[pd];W[lq];B[eo];W[ep];B[fo];W[hq];B[ip];W[iq];B[ql];W[rk];B[rl];W[om];B[qk];W[dr];B[cr];W[ds];B[rj];W[qj];B[ri];W[kc];B[jd];W[lc];B[md];W[mb];B[nb];W[mc];B[nc];W[ma];B[na];W[ii];B[hh];W[ij];B[ik];W[hj];B[gk];W[gj];B[fi];W[gi];B[gh];W[fj];B[gg];W[ei];B[fh];W[ek];B[fl];W[dh];B[ch];W[dj];B[ci];W[cg];B[eh];W[dg];B[ej];W[jf];B[je];W[ei];B[er];W[es];B[ej];W[ho];B[io];W[ei];B[km];W[jn];B[jo];W[kn];B[ko];W[ln];B[kp];W[ej];B[jq];W[ck];B[bk];W[dl];B[cj];W[dm];B[cl];W[dk];B[am];W[do];B[en];W[kq];B[jr];W[an];B[ak];W[mq];B[kl];W[ll];B[rg];W[qi];B[ol];W[pl];B[pk];W[pm];B[oj];W[oi];B[ok];W[lp];B[kr];W[lr];B[ir];W[hr])";
+            // const sample = "(;GM[1]FF[4]SZ[19]GN[]DT[2025-02-01]PB[cafelatte]PW[coopter]BR[3谿ｵ]WR[3谿ｵ]KM[0]HA[0]RU[Japanese]AP[GNU Go:3.8]RE[B+1.50]TM[1200]TC[3]TT[30]RL[0];B[pd];W[pp];B[cd];W[dp];B[qn];W[pj];B[nq];W[np];B[mp];W[no];B[pq];W[qq];B[oq];W[qp];B[jq];W[mo];B[lp];W[qf];B[nc];W[rd];B[cn];W[dn];B[dm];W[en];B[co];W[cp];B[cj];W[em];B[dl];W[fq];B[qc];W[ec];B[de];W[hc];B[dc];W[nj];B[ed];W[kc];B[rc];W[of];B[pm];W[po];B[qj];W[qi];B[qk];W[ri];B[ro];W[ol];B[rp];W[rq];B[rm];W[pl];B[ql];W[di];B[ci];W[dg];B[cg];W[ch];B[bh];W[dh];B[cf];W[hr];B[fc];W[jr];B[kr];W[ir];B[iq];W[he];B[ff];W[fk];B[jn];W[ho];B[jl];W[le];B[ne];W[nf];B[me];W[mf];B[lf];W[lg];B[kf];W[ke];B[jf];W[hg];B[jh];W[hi];B[jj];W[ki];B[ji];W[kj];B[kk];W[lk];B[ll];W[mk];B[jd];W[je];B[ie];W[if];B[kh];W[id];B[lh];W[mi];B[mh];W[nh];B[bp];W[bq];B[bo];W[cr];B[lb];W[kb];B[mc];W[lc];B[mb];W[gb];B[fb];W[ks];B[lr];W[ik];B[jk];W[re];B[mm];W[om];B[rj];W[hm];B[hq];W[gq];B[el];W[fl];B[si];W[sh];B[sj];W[rg];B[do];W[eo];B[gc];W[hb];B[hl];W[il];B[dj];W[fi];B[lo];W[sc];B[sb];W[sd];B[ra];W[pr];B[or];W[qr];B[hp];W[gp];B[io];W[in];B[jo];W[mg];B[nm];W[pn];B[pe];W[pf];B[ej];W[fh];B[fj];W[gj];B[li];W[lj];B[pk];W[ok];B[ka];W[ja];B[la];W[oe];B[od];W[gf];B[fe];W[fg];B[ij];W[hj];B[jm];W[im];B[ls];W[js];B[ih];W[mn];B[ln];W[qm];B[sp];W[qo];B[rn];W[md];B[nd];W[ld];B[ps];W[qs];B[os];W[nn];B[ga];W[ha];B[fa];W[gd];B[fd];W[hh];B[ge];W[hd];B[ef];W[sq];B[ek];W[ml];B[nl];W[nk];B[lm];W[ap];B[ao];W[aq];B[op];W[oo];B[ig];W[kg];B[jg];W[pm];B[eg])";
+            // const sample = "(;AP[MultiGo:4.2.4]SZ[19]MULTIGOGM[1]PB[趙治勲]BR[九段]PW[羽根直樹]WR[棋聖]DT[2004/09/23]RE[W+0.5]KM[6.5]TM[300]RU[Japanese]PC[]EV[第30期名人戦　最終予選]GC[228手完白半目勝ち];B[pd];W[dd];B[pq];W[dp];B[qo];W[kq];B[fc];W[cf];B[db];W[qf];B[nc];W[cc];B[qi];W[hc];B[ed];W[kc];B[qe];W[nq];B[cn];W[fp];B[bp];W[cq];B[ck];W[pf];B[ld];W[lc];B[mc];W[je];B[nh];W[nf];B[kf];W[mg];B[jf];W[mh];B[ie];W[gd];B[de];W[ce];B[dc];W[cd];B[fe];W[kd];B[ke];W[jd];B[hf];W[gb];B[id];W[ic];B[mb];W[ig];B[if];W[md];B[le];W[kb];B[ni];W[lj];B[mk];W[kh];B[lk];W[mj];B[nj];W[kk];B[kl];W[jl];B[km];W[ci];B[fb];W[no];B[on];W[mm];B[nm];W[pr];B[qq];W[jk];B[kp];W[jq];B[mp];W[lp];B[mq];W[mo];B[lq];W[lo];B[np];W[oo];B[op];W[nl];B[ol];W[nk];B[ok];W[ml];B[po];W[nn];B[om];W[jp];B[en];W[fn];B[fm];W[gn];B[eo];W[bq];B[gm];W[hm];B[hl];W[im];B[re];W[od];B[oc];W[rf];B[rh];W[ga];B[eg];W[kr];B[lr];W[pe];B[qd];W[bo];B[co];W[cp];B[bn];W[ap];B[bi];W[bh];B[bj];W[dh];B[cb];W[bb];B[ba];W[ab];B[fk];W[nd];B[jh];W[ih];B[ll];W[kn];B[ki];W[lh];B[jg];W[ii];B[ji];W[ij];B[eh];W[ph];B[pi];W[ei];B[gh];W[pc];B[qc];W[pb];B[ob];W[dk];B[dl];W[ek];B[el];W[qb];B[rb];W[rc];B[sd];W[cj];B[bl];W[fj];B[ah];W[ag];B[ai];W[cg];B[gc];W[hd];B[fa];W[ib];B[df];W[gk];B[gl];W[fh];B[fg];W[gi];B[hh];W[hg];B[gg];W[qh];B[ep];W[eq];B[rg];W[sg];B[pa];W[qg];B[ri];W[ge];B[gf];W[og];B[me];W[ne];B[fo];W[go];B[ks];W[js];B[ls];W[fl];B[hi];W[do];B[dn];W[fk];B[fi];W[gj];B[il];W[oh];B[bc];W[bd];B[an];W[ao];B[jo];W[io];B[la];W[oi];B[oj];W[sf];B[sh];W[se];B[qa];W[ka];B[lb];W[dg];B[jm];W[in];B[ik];W[hj];B[kj];W[jj];B[fh];W[jn])";
+    
+            const parsed = sgf.parse(sample);
+            self.exit("GameScene", {kifu: parsed});
+        };
+
     }
 });
 
 phina.define('GameScene', {
     superClass: 'DisplayScene',
-    init: function(param/*{}*/) {
+    init: function(param/*{sgf:string}*/) {
         this.superInit(param);
 
         const self = this;
@@ -437,19 +502,7 @@ phina.define('GameScene', {
         };
 
 
-        const sgf = new SgfParser();
-
-        // const kifu = sgf.parse("");
-        // const kifu = sgf.parse("(;GM[1]SZ[19]KM[7]RU[Chinese]RE[W+R]PB[miguruta (1473)]PW[nken6516 (1369)];B[pc];W[dq];B[do];W[co];B[cn];W[cp];B[dm];W[fq];B[cj];W[cd];B[qp];W[pe];B[nd];W[qc];B[qb];W[qd];B[rb];W[qh];B[kq];W[kc];B[mc];W[fc];B[hc];W[ke];B[he];W[fe];B[nf];W[kg];B[hg];W[fg];B[hi];W[ch];B[ki];W[lh];B[li];W[mh];B[nj];W[oh];B[pi];W[mi];B[mj];W[ph];B[hq];W[op];B[pn];W[qq];B[rq];W[pq];B[nq];W[np];B[mp];W[mo];B[lp];W[nn];B[po];W[kn];B[kl];W[in];B[ho];W[hn];B[gn];W[gm];B[fn];W[io];B[hp];W[il];B[lo];W[ln];B[mm];W[mn];B[er];W[eq];B[fr];W[ds];B[gr];W[gk];B[fh];W[eh];B[fi];W[ei];B[fj];W[rr];B[rp];W[sr];B[oq];W[pp];B[oo];W[no];B[om];W[nm];B[nl];W[km];B[qi];W[oi];B[oj];W[ri];B[rj];W[rh];B[qk];W[bj];B[bk];W[bi];B[bn];W[bo];B[bq];W[dr];B[ao];W[ap];B[an];W[bp];B[gb];W[fb];B[fa];W[ea];B[ga];W[ec];B[gg];W[ff];B[se];W[re];B[sc];W[sf];B[sd];W[oe];B[ne];W[gc];B[ib];W[id];B[hd];W[lb];B[mb];W[ck];B[bl];W[dj];B[bs];W[br];B[dp];W[cq];B[of];W[qf];B[pr];W[qr];B[or];W[eo];B[dn];W[fo];B[go];W[ek];B[cl];W[dk];B[fm];W[fl];B[jl];W[jm];B[ik];W[hk];B[ij];W[ip];B[lm];W[jq];B[jr];W[kp];B[lr];W[iq];B[ir];W[ps];B[os];W[qs];B[jg];W[jf];B[kh];W[ig];B[lg];W[jh];B[mg];W[ie];B[hf];W[ii];B[ji];W[ih];B[jc];W[jd];B[kb];W[if];B[lc];W[kd];B[lf];W[kf];B[pf];W[pd];B[od];W[rc];B[sb];W[rd];B[ko];W[jo];B[jp];W[ic];B[jb];W[kp];B[fk];W[mq];B[lq];W[hj];B[kk];W[hh];B[gh];W[sq];B[sp];W[ol];B[nk];W[pm];B[qm];W[on];B[pl];W[qo])");
-        // const kifu = sgf.parse("(;FF[1]CA[UTF-8]SZ[19]PB[COMLv5級]PW[COMLv5級]BS[11]WS[11]KM[0.0]HA[2]RU[Chinese]AP[みんなの囲碁]VW[]GN[みんなの囲碁]GC[]DT[2025-02-04 09:44:21]RE[B+5.0]AB[pd][dp];W[pp];B[dd];W[qf];B[nc];W[rd];B[qc];W[qi];B[nq];W[lq];B[qq];W[qp];B[pq];W[op];B[nr];W[mo];B[rp];W[ro];B[rq];W[qn];B[dj];W[fq];B[cn];W[dr];B[cq];W[fo];B[gp];W[fp];B[jq];W[jo];B[lr];W[kr];B[kq];W[mr];B[lp];W[mq];B[mp];W[ls];B[np];W[jr];B[iq];W[ir];B[hr];W[hq];B[hp];W[gq];B[io];W[kp];B[ko];W[jp];B[ip];W[jn];B[in];W[jm];B[im];W[jl];B[il];W[jk];B[ik];W[jj];B[ij];W[ji];B[ii];W[jh];B[ih];W[jg];B[ig];W[jf];B[if];W[je];B[hd];W[cc];B[cd];W[dc];B[ec];W[eb];B[fc];W[fb];B[gb];W[bd];B[be];W[bc];B[cf];W[no];B[lo];W[ln];B[kn];W[lm];B[km];W[kl];B[of];W[oh];B[mg];W[mh];B[lh];W[lg];B[nh];W[mi];B[ng];W[ni];B[lf];W[kg];B[pg];W[qg];B[ph];W[pi];B[qh];W[rh];B[rc];W[qd];B[pe];W[fm];B[fk];W[dm];B[cm];W[dl];B[cl];W[dk];B[ck];W[ej];B[ek];W[cj];B[di];W[ci];B[dh];W[ch];B[cg];W[bg];B[bf];W[bk];B[bl];W[bi];B[ag];W[ah];B[bh];W[oq];B[or];W[bg];B[af];W[aj];B[bh];W[pr];B[qr];W[bg];B[ad];W[ac];B[bh];W[gc];B[gd];W[bg];B[db];W[cb];B[bh];W[hc];B[ic];W[bg];B[fa];W[da];B[bh];W[hb];B[ib];W[bg];B[ha];W[bh];B[cr];W[le];B[me];W[ld];B[md];W[lc];B[sd];W[re];B[se];W[sf];B[sc];W[rg];B[qe];W[rf];B[er];W[fr];B[ds];W[eq];B[dq];W[fs];B[es];W[mb];B[nb];W[na];B[oa];W[ma];B[pb];W[kb];B[dn];W[em];B[al];W[ak];B[gl];W[gm];B[hm];W[ie];B[he];W[eo];B[do];W[go];B[en];W[ns];B[ps];W[sp];B[sq];W[so];B[og];W[oi];B[jc];W[kf];B[mf];W[ja];B[jb];W[kc];B[ia];W[ka];B[jd];W[kd];B[id];W[ms];B[os];W[ae];B[oo];W[on];B[ad];W[qs];B[rs];W[ae];B[po];W[qo];B[ad];W[dg];B[eg];W[ae];B[df];W[ad];B[mc];W[ea];B[ga];W[fl];B[gk];W[fn];B[hn];W[gn];B[pf];W[ho];B[el];W[hs];B[ep];W[tt];B[tt])");
-        // const kifu = sgf.parse("(;FF[1]CA[UTF-8]SZ[19]PB[COMLv6級]PW[COMLv4級]BS[10]WS[12]KM[0.0]HA[2]RU[Chinese]AP[みんなの囲碁]VW[]GN[みんなの囲碁]GC[]DT[2025-02-03 22:23:40]RE[W+9.0]AB[pd][dp];W[cd];B[pp];W[cn];B[fq];W[bp];B[cq];W[ck];B[ed];W[df];B[cc];W[bc];B[dc];W[be];B[hc];W[nq];B[lq];W[qn];B[np];W[mp];B[mq];W[op];B[no];W[oo];B[oq];W[pq];B[nr];W[or];B[nq];W[qp];B[pr];W[po];B[qq];W[rq];B[pp];W[qr];B[pq];W[rr];B[rp];W[qo];B[nm];W[qk];B[qi];W[nc];B[oc];W[nd];B[pf];W[jc];B[lc];W[ld];B[kd];W[kc];B[md];W[le];B[mc];W[me];B[nb];W[oe];B[pe];W[ob];B[mb];W[pc];B[od];W[ne];B[pb];W[je];B[id];W[jd];B[hf];W[jg];B[hh];W[ji];B[hj];W[jk];B[hl];W[jm];B[in];W[jn];B[io];W[jo];B[jp];W[kp];B[kq];W[mn];B[nn];W[nk];B[ml];W[mk];B[ll];W[lk];B[kl];W[jl];B[kk];W[kj];B[ij];W[jj];B[ko];W[kn];B[lp];W[lo];B[mo];W[kp];B[ip];W[bq];B[br];W[cp];B[dq];W[ar];B[bs];W[do];B[eo];W[en];B[fo];W[fn];B[gn];W[gm];B[hm];W[di];B[fm];W[em];B[fl];W[el];B[ek];W[dk];B[ej];W[ei];B[fi];W[fh];B[gi];W[ff];B[ge];W[og];B[pg];W[oh];B[ph];W[rj];B[ri];W[si];B[sh];W[sj];B[rg];W[ib];B[hb];W[ha];B[ga];W[ia];B[fb];W[cb];B[db];W[bb];B[oi];W[ni];B[oj];W[nj];B[ok];W[nl];B[ol];W[mm];B[ko];W[ln];B[ql];W[rl];B[qm];W[rm];B[qj];W[pm];B[pl];W[fe];B[fd];W[ie];B[he];W[ic];B[hd];W[lb];B[la];W[kb];B[oa];W[ka];B[ma];W[dj];B[of];W[nf];B[pk];W[rk];B[om];W[pn];B[qs];W[rs];B[ps];W[ro];B[ee];W[ef];B[de];W[ce];B[ca];W[ba];B[da];W[gg];B[hg];W[fk];B[gl];W[fj];B[ih];W[jh];B[if];W[jf];B[gh];W[ii];B[gf];W[fg];B[gj];W[kp];B[dn];W[dm];B[ko];W[fa];B[gb];W[kp];B[co];W[bo];B[ko];W[cr];B[dr];W[kp];B[nh];W[ng];B[ko];W[rh];B[sg];W[kp];B[sp];W[so];B[ko];W[aq];B[kp];W[as];B[cs];W[gk];B[hk];W[ik];B[im];W[il];B[hi];W[on];B[dd];W[ig];B[tt];W[tt])");
-        // const kifu = sgf.parse("(;FF[1]CA[UTF-8]SZ[19]PB[COMLv6級]PW[COMLv初段]BS[10]WS[16]KM[0.0]HA[4]RU[Chinese]AP[みんなの囲碁]VW[]GN[みんなの囲碁]GC[]DT[2025-02-03 22:02:43]RE[W+R]AB[pd][dp][pp][dd];W[qf];B[nd];W[qn];B[nq];W[rp];B[qq];W[pl];B[dj];W[fc];B[hc];W[fe];B[df];W[jc];B[he];W[fg];B[hg];W[fi];B[dh];W[fk];B[dl];W[je];B[jg];W[lf];B[lg];W[mf];B[of];W[mg];B[lh];W[mh];B[li];W[mi];B[lj];W[mc];B[nc];W[mb];B[nb];W[rd];B[qc];W[rc];B[rb];W[sb];B[qb];W[ph];B[oh];W[oi];B[pg];W[qg];B[pi];W[qh];B[oj];W[ni];B[pk];W[nk];B[nj];W[mj];B[mk];W[ol];B[ml];W[ok];B[pj];W[qk];B[ec];W[fb];B[eb];W[hb];B[ib];W[ic];B[gb];W[hd];B[ha];W[gd];B[fa];W[gc];B[hb];W[jb];B[ie];W[id];B[jf];W[kf];B[kg];W[fm];B[dn];W[kk];B[lk];W[kl];B[mn];W[lm];B[mm];W[lq];B[ko];W[iq];B[io];W[gp];B[go];W[fo];B[hp];W[hq];B[fp];W[gq];B[fn];W[eo];B[gn];W[ep];B[en];W[dq];B[cq];W[cp];B[do];W[eq];B[cr];W[dr];B[bp];W[cs];B[bs];W[ds];B[br];W[hk];B[ij];W[ik];B[jj];W[jn];B[jo];W[in];B[kn];W[hn];B[ho];W[gm];B[jm];W[im];B[il];W[hm];B[jl];W[jk];B[km];W[hi];B[hj];W[gj];B[gh];W[fh];B[gi];W[kj];B[ki];W[ji];B[jh];W[ii];B[gf];W[ff];B[kq];W[kr];B[jq];W[jr];B[lp];W[mq];B[mp];W[nr];B[oq];W[or];B[pr];W[rq];B[rr];W[oe];B[ne];W[pe];B[nf];W[od];B[oc];W[qd];B[pc];W[pa])");
-        // const kifu = sgf.parse("(;FF[1]CA[UTF-8]SZ[19]PB[COMLv10級]PW[COMLv二段]BS[6]WS[17]KM[6.5]HA[0]RU[Chinese]AP[みんなの囲碁]VW[]GN[みんなの囲碁]GC[]DT[2025-02-03 21:26:07]RE[W+58.5];B[pd];W[pp];B[dp];W[dd];B[fc];W[cf];B[db];W[cc];B[ic];W[qf];B[qe];W[pf];B[nd];W[pj];B[nq];W[qn];B[pr];W[qq];B[kq];W[cn];B[fq];W[dj];B[cl];W[dl]TL[1,0];B[cm];W[dm];B[bn];W[co];B[bo];W[cp];B[cq];W[bp];B[bq];W[ao];B[an];W[ap];B[bl];W[bj];B[dn];W[do];B[en];W[eo];B[fn];W[fo];B[go];W[gn];B[gm];W[hn];B[fm];W[gp];B[ho];W[fp];B[hp];W[gq]TL[1,0];B[eq];W[hq]TL[1,0];B[iq];W[ir];B[jr];W[ip];B[io];W[jq];B[jp];W[iq];B[jo];W[kr]TL[1,0];B[lr];W[js];B[lq];W[dr];B[dq];W[fr]TL[1,0];B[er];W[gr];B[cr];W[ar];B[aq];W[ds];B[es];W[bs];B[cs];W[ck];B[ek];W[dk];B[ej];W[ei]TL[1,0];B[fi];W[fh];B[eh];W[di];B[gh];W[fg];B[gj];W[gg];B[hh];W[hg]TL[1,0];B[ih];W[ig]TL[1,0];B[jh];W[lc];B[ld];W[kd];B[kc];W[md];B[le];W[me];B[mc];W[lb];B[mb];W[nc]TL[1,0];B[nb];W[oc];B[ob];W[lf]TL[1,0];B[ke];W[kf];B[jd];W[je];B[kd];W[od];B[pc];W[oe];B[rf];W[rg];B[re];W[qr];B[or];W[li]TL[1,0];B[kj];W[lj];B[kk];W[lk];B[ll];W[ml];B[lm];W[mm];B[mn];W[nn];B[mo];W[no];B[np];W[cb];B[dc];W[ed];B[fd];W[fe];B[ec];W[hd];B[hc];W[gd];B[gc];W[id];B[kb];W[ki];B[ji];W[kh];B[jg];W[jf];B[kg];W[lg];B[mf];W[ne];B[mg];W[mh];B[ng];W[nh];B[og];W[ph];B[pg];W[qg];B[oh];W[oi];B[qh];W[pi];B[rh];W[sg];B[sh];W[ri];B[qi];W[qj];B[pe];W[of];B[sf];W[el];B[fl];W[da];B[ea];W[ca];B[fb];W[op];B[oq];W[ls];B[ms];W[ks];B[qs];W[rs];B[ps];W[rr];B[fs];W[gs];B[ep];W[dr];B[pq];W[em])");
-        // const kifu = sgf.parse("(;FF[4]CA[UTF-8]GM[1]DT[2025-02-02]PC[OGS: https://online-go.com/game/71982392]GN[Дружеский матч]PB[BlackLion]PW[hisana15]BR[18k]WR[19k]TM[259200]OT[86400 fischer]RE[W+38.5]SZ[19]KM[6.5]RU[Japanese];B[pd];W[dp];B[dd];W[pp];B[qq];W[pq];B[qp];W[po];B[qc];W[jp];B[cc];W[jc];B[gc];W[mc];B[nc];W[hb];B[gb];W[nb];B[ob];W[nd];B[oc];W[mb];B[cq];W[dq];B[cp];W[do];B[co];W[je];B[dn];W[fo];B[em];W[jk];B[ci];W[ji];B[pg];W[qj];B[qi];W[pj];B[pi];W[oi];B[oh];W[ni];B[gi];W[gm];B[gf];W[gk];B[fk];W[gj];B[fj];W[ij];B[cf];W[he];B[ge];W[hd];B[gd];W[ib];B[nf];W[me];B[nh];W[mh];B[mg];W[lh];B[lg];W[kg];B[dr];W[er];B[cr];W[fq];B[qo];W[qn];B[rn];W[qm];B[rm];W[ql];B[rl];W[cm];B[cn];W[cj];B[dj];W[ck];B[bm];W[bl];B[am];W[bi];B[dm];W[ch];B[cl];W[di];B[dk];W[bk];B[ei];W[eh];B[fh];W[eg];B[ef];W[dg];B[df];W[cg];B[bg];W[bh];B[bf];W[fl];B[el];W[fn];B[fm];W[gl];B[ih];W[hi];B[hh];W[jh];B[ii];W[hj];B[hf];W[if];B[ig];W[jg];B[pr];W[or];B[ps];W[os];B[qr];W[ri];B[rh];W[rj];B[qh];W[oe];B[pe];W[of];B[og];W[pf];B[qf];W[ne];B[mf];W[lf];B[ng];W[ke];B[hr];W[jr];B[gq];W[gp];B[fr];W[fs];B[gs];W[gr];B[hs];W[hq];B[iq];W[ip];B[jq];W[kq];B[mr];W[mp];B[lr];W[kr];B[lq];W[lp];B[fg];W[nq];B[ds];W[es];B[hc];W[ic];B[si];W[sj];B[sh];W[rk];B[sl];W[ag];B[af];W[ah];B[na];W[ma];B[oa];W[ga];B[fa];W[ha];B[eb];W[al];B[od];W[oj];B[en];W[eo];B[];W[])");
-        // const kifu = sgf.parse("(;FF[4]CA[UTF-8]GM[1]DT[2025-01-24]PC[OGS: https://online-go.com/game/71691087]GN[hazbot vs. hisana15]PB[hazbot]PW[hisana15]BR[22k]WR[19k]TM[259200]OT[86400 fischer]RE[W+R]SZ[19]KM[0.5]RU[Japanese];B[dd];W[pp];B[qd];W[dp];B[di];W[jp];B[kd];W[pj];B[dn];W[fp];B[qq];W[pq];B[qp];W[qo];B[ro];W[qn];B[rn];W[qm];B[rm];W[qg];B[pf];W[jm];B[jk];W[hm];B[gm];W[hl];B[hk];W[gl];B[fm];W[nj];B[fk];W[lk];B[go];W[gp];B[hn];W[in];B[il];W[im];B[jl];W[lm];B[hp];W[le];B[lf];W[me];B[nd];W[nf];B[nh];W[oh];B[og];W[ng];B[mh];W[pg];B[of];W[lg];B[kf];W[lh];B[mf];W[mg];B[ne];W[mi];B[ld];W[fc];B[ec];W[ic];B[gc];W[gb];B[fd];W[fb];B[gd];W[kb];B[lb];W[hc];B[jc];W[jb];B[id];W[cd];B[cc];W[ce];B[df];W[bg];B[cf];W[bf];B[bi];W[bc];B[ae];W[cb];B[dc];W[da];B[db];W[ba];B[ea];W[ca];B[eb];W[ha];B[ab];W[ac];B[de];W[bd];B[hd];W[ia];B[fa];W[ka];B[cq];W[cp];B[dq];W[eq];B[er];W[fr];B[es];W[jh];B[jg];W[ig];B[kh];W[ni];B[ih];W[ji];B[if];W[hg];B[kg];W[ki];B[hi];W[bn];B[bm];W[cn];B[cm];W[bq];B[br];W[ap];B[ar];W[fs];B[cs];W[re];B[rd];W[qe];B[pe];W[qf];B[pd];W[lq];B[eo];W[ep];B[fo];W[hq];B[ip];W[iq];B[ql];W[rk];B[rl];W[om];B[qk];W[dr];B[cr];W[ds];B[rj];W[qj];B[ri];W[kc];B[jd];W[lc];B[md];W[mb];B[nb];W[mc];B[nc];W[ma];B[na];W[ii];B[hh];W[ij];B[ik];W[hj];B[gk];W[gj];B[fi];W[gi];B[gh];W[fj];B[gg];W[ei];B[fh];W[ek];B[fl];W[dh];B[ch];W[dj];B[ci];W[cg];B[eh];W[dg];B[ej];W[jf];B[je];W[ei];B[er];W[es];B[ej];W[ho];B[io];W[ei];B[km];W[jn];B[jo];W[kn];B[ko];W[ln];B[kp];W[ej];B[jq];W[ck];B[bk];W[dl];B[cj];W[dm];B[cl];W[dk];B[am];W[do];B[en];W[kq];B[jr];W[an];B[ak];W[mq];B[kl];W[ll];B[rg];W[qi];B[ol];W[pl];B[pk];W[pm];B[oj];W[oi];B[ok];W[lp];B[kr];W[lr];B[ir];W[hr])");
-        const kifu = sgf.parse("(;GM[1]FF[4]SZ[19]GN[]DT[2025-02-01]PB[cafelatte]PW[coopter]BR[3谿ｵ]WR[3谿ｵ]KM[0]HA[0]RU[Japanese]AP[GNU Go:3.8]RE[B+1.50]TM[1200]TC[3]TT[30]RL[0];B[pd];W[pp];B[cd];W[dp];B[qn];W[pj];B[nq];W[np];B[mp];W[no];B[pq];W[qq];B[oq];W[qp];B[jq];W[mo];B[lp];W[qf];B[nc];W[rd];B[cn];W[dn];B[dm];W[en];B[co];W[cp];B[cj];W[em];B[dl];W[fq];B[qc];W[ec];B[de];W[hc];B[dc];W[nj];B[ed];W[kc];B[rc];W[of];B[pm];W[po];B[qj];W[qi];B[qk];W[ri];B[ro];W[ol];B[rp];W[rq];B[rm];W[pl];B[ql];W[di];B[ci];W[dg];B[cg];W[ch];B[bh];W[dh];B[cf];W[hr];B[fc];W[jr];B[kr];W[ir];B[iq];W[he];B[ff];W[fk];B[jn];W[ho];B[jl];W[le];B[ne];W[nf];B[me];W[mf];B[lf];W[lg];B[kf];W[ke];B[jf];W[hg];B[jh];W[hi];B[jj];W[ki];B[ji];W[kj];B[kk];W[lk];B[ll];W[mk];B[jd];W[je];B[ie];W[if];B[kh];W[id];B[lh];W[mi];B[mh];W[nh];B[bp];W[bq];B[bo];W[cr];B[lb];W[kb];B[mc];W[lc];B[mb];W[gb];B[fb];W[ks];B[lr];W[ik];B[jk];W[re];B[mm];W[om];B[rj];W[hm];B[hq];W[gq];B[el];W[fl];B[si];W[sh];B[sj];W[rg];B[do];W[eo];B[gc];W[hb];B[hl];W[il];B[dj];W[fi];B[lo];W[sc];B[sb];W[sd];B[ra];W[pr];B[or];W[qr];B[hp];W[gp];B[io];W[in];B[jo];W[mg];B[nm];W[pn];B[pe];W[pf];B[ej];W[fh];B[fj];W[gj];B[li];W[lj];B[pk];W[ok];B[ka];W[ja];B[la];W[oe];B[od];W[gf];B[fe];W[fg];B[ij];W[hj];B[jm];W[im];B[ls];W[js];B[ih];W[mn];B[ln];W[qm];B[sp];W[qo];B[rn];W[md];B[nd];W[ld];B[ps];W[qs];B[os];W[nn];B[ga];W[ha];B[fa];W[gd];B[fd];W[hh];B[ge];W[hd];B[ef];W[sq];B[ek];W[ml];B[nl];W[nk];B[lm];W[ap];B[ao];W[aq];B[op];W[oo];B[ig];W[kg];B[jg];W[pm];B[eg])");
-        // const kifu = sgf.parse("(;AP[MultiGo:4.2.4]SZ[19]MULTIGOGM[1]PB[趙治勲]BR[九段]PW[羽根直樹]WR[棋聖]DT[2004/09/23]RE[W+0.5]KM[6.5]TM[300]RU[Japanese]PC[]EV[第30期名人戦　最終予選]GC[228手完白半目勝ち];B[pd];W[dd];B[pq];W[dp];B[qo];W[kq];B[fc];W[cf];B[db];W[qf];B[nc];W[cc];B[qi];W[hc];B[ed];W[kc];B[qe];W[nq];B[cn];W[fp];B[bp];W[cq];B[ck];W[pf];B[ld];W[lc];B[mc];W[je];B[nh];W[nf];B[kf];W[mg];B[jf];W[mh];B[ie];W[gd];B[de];W[ce];B[dc];W[cd];B[fe];W[kd];B[ke];W[jd];B[hf];W[gb];B[id];W[ic];B[mb];W[ig];B[if];W[md];B[le];W[kb];B[ni];W[lj];B[mk];W[kh];B[lk];W[mj];B[nj];W[kk];B[kl];W[jl];B[km];W[ci];B[fb];W[no];B[on];W[mm];B[nm];W[pr];B[qq];W[jk];B[kp];W[jq];B[mp];W[lp];B[mq];W[mo];B[lq];W[lo];B[np];W[oo];B[op];W[nl];B[ol];W[nk];B[ok];W[ml];B[po];W[nn];B[om];W[jp];B[en];W[fn];B[fm];W[gn];B[eo];W[bq];B[gm];W[hm];B[hl];W[im];B[re];W[od];B[oc];W[rf];B[rh];W[ga];B[eg];W[kr];B[lr];W[pe];B[qd];W[bo];B[co];W[cp];B[bn];W[ap];B[bi];W[bh];B[bj];W[dh];B[cb];W[bb];B[ba];W[ab];B[fk];W[nd];B[jh];W[ih];B[ll];W[kn];B[ki];W[lh];B[jg];W[ii];B[ji];W[ij];B[eh];W[ph];B[pi];W[ei];B[gh];W[pc];B[qc];W[pb];B[ob];W[dk];B[dl];W[ek];B[el];W[qb];B[rb];W[rc];B[sd];W[cj];B[bl];W[fj];B[ah];W[ag];B[ai];W[cg];B[gc];W[hd];B[fa];W[ib];B[df];W[gk];B[gl];W[fh];B[fg];W[gi];B[hh];W[hg];B[gg];W[qh];B[ep];W[eq];B[rg];W[sg];B[pa];W[qg];B[ri];W[ge];B[gf];W[og];B[me];W[ne];B[fo];W[go];B[ks];W[js];B[ls];W[fl];B[hi];W[do];B[dn];W[fk];B[fi];W[gj];B[il];W[oh];B[bc];W[bd];B[an];W[ao];B[jo];W[io];B[la];W[oi];B[oj];W[sf];B[sh];W[se];B[qa];W[ka];B[lb];W[dg];B[jm];W[in];B[ik];W[hj];B[kj];W[jj];B[fh];W[jn])");
-        // const kifu = sgf.parse("(;GM[1]SZ[19];B[pd];W[pe];B[od];W[oe];B[oc];W[ne])");
+        const kifu = param.kifu;
 
         const boards = [];  // {board: board, lastX: x, lastY: y}
 
@@ -1102,20 +1155,25 @@ phina.define('GameScene', {
         function controlButtons() {
 
             gukeiNextButton.hide();
-            gukeiBackButton.hide();
+            // gukeiBackButton.hide();
             backButton.hide();
             forwardButton.hide();
 
             if (move > 0) {
-                gukeiBackButton.show();
+                // gukeiBackButton.show();
                 backButton.show();
             }
 
             if (move < boards.length - 1) {
-                gukeiNextButton.show();
                 forwardButton.show();
             }
 
+            for (let i = move + 1; i < gukeiList.length; i++) {
+                if (gukeiList[i] !== null) {
+                    gukeiNextButton.show();
+                    break;
+                }
+            }
         }
 
         const gukeiNextButton = MyButton({
@@ -1145,40 +1203,40 @@ phina.define('GameScene', {
             controlButtons();
         };
 
-        const gukeiBackButton = MyButton({
-            text: "前の愚形",
-            width: 180,
-            height: 50,
-            fill: "white",
-            fontColor: "black",
-            stroke: "black",
-            strokeWidth: 5,
-        }).addChildTo(this).setPosition(this.gridX.center(5.3), this.gridY.center(5.2));
-        gukeiBackButton.selected = function() {
-            if (move === 0) return;
-            for (let i = move - 1; i >= 0; i--) {
-                if (gukeiList[i] !== null) {
-                    const m = gukeiList[i].move - 1;
-                    board = boards[m].board;
-                    drawAllStones(boards[m].lastX, boards[m].lastY);
-                    move = m;
-                    break;
-                }
-            }
-            updateGukeiLabel();
-            controlButtons();
-        };
+        // const gukeiBackButton = MyButton({
+        //     text: "前の愚形",
+        //     width: 180,
+        //     height: 50,
+        //     fill: "white",
+        //     fontColor: "black",
+        //     stroke: "black",
+        //     strokeWidth: 5,
+        // }).addChildTo(this).setPosition(this.gridX.center(5.3), this.gridY.center(5.2));
+        // gukeiBackButton.selected = function() {
+        //     if (move === 0) return;
+        //     for (let i = move - 1; i >= 0; i--) {
+        //         if (gukeiList[i] !== null) {
+        //             const m = gukeiList[i].move - 1;
+        //             board = boards[m].board;
+        //             drawAllStones(boards[m].lastX, boards[m].lastY);
+        //             move = m;
+        //             break;
+        //         }
+        //     }
+        //     updateGukeiLabel();
+        //     controlButtons();
+        // };
 
         const backButton = MyButton({
             text: "<",
             width: 80,
-            height: 50,
+            height: 120,
             fill: "white",
             fontSize: 28,
             fontColor: "black",
             stroke: "black",
             strokeWidth: 5,
-        }).addChildTo(this).setPosition(this.gridX.center(4.1), this.gridY.center(6.3));
+        }).addChildTo(this).setPosition(this.gridX.center(4.1), this.gridY.center(5.8));
         backButton.selected = function() {
             if (move === 0) return;
             move -= 1;
@@ -1191,13 +1249,13 @@ phina.define('GameScene', {
         const forwardButton = MyButton({
             text: ">",
             width: 80,
-            height: 50,
+            height: 120,
             fill: "white",
             fontSize: 28,
             fontColor: "black",
             stroke: "black",
             strokeWidth: 5,
-        }).addChildTo(this).setPosition(this.gridX.center(6.5), this.gridY.center(6.3));
+        }).addChildTo(this).setPosition(this.gridX.center(6.5), this.gridY.center(5.8));
         forwardButton.selected = function() {
             if (move === boards.length - 1) {
                 return;
@@ -1218,7 +1276,7 @@ phina.define('GameScene', {
             fontColor: "black",
             stroke: "black",
             strokeWidth: 5,
-        }).addChildTo(this).setPosition(this.gridX.center(6.5), this.gridY.center(7.4));
+        }).addChildTo(this).setPosition(this.gridX.center(6.5), this.gridY.center(7.5));
         endButton.selected = function() {
             self.exit("TitleScene");
         };
