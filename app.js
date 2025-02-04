@@ -10,7 +10,7 @@ phina.define('TitleScene', {
         this.backgroundColor = "white";
 
         Label({
-            text: "愚形ちゃん",
+            text: "愚形さがし",
             fontSize: 64,
         })
         .addChildTo(this)
